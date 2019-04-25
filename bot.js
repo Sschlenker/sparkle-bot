@@ -44,18 +44,56 @@ bot.on('message', function (user, userID, channelID, message, evt) {
       // if a webpage is found
       if (!error && response.statusCode == 200) {
         // load html through cheerio
-        const $ = cheerio.load('<p>' + html + '</p>');
+        const $ = cheerio.load(html);
         const player = $('.col-md-12');
+
+        const [playerName, guild, className, classLevel, realmRank, race, realmTitle] = player.text().trim()
+          .split('\n')
+          .filter(el => el.replace('-', '').trim().length)
+          .map(function(item) {
+          return item.trim();
+        });;
 
         bot.sendMessage({
           to: channelID,
-          message: player.text()
+          embed: {
+            color: 6826080,
+            fields: [
+              { 
+                name: 'Name',
+                value:  `${playerName} ${guild}`
+              },
+              {
+                name: 'Class',
+                value: className,
+                inline: true
+              },
+              {
+                name: 'Level',
+                value: classLevel,
+                inline: true
+              },
+              {
+                name: 'Realm Rank',
+                value: realmRank,
+                inline: true
+              },
+              {
+                name: 'Race/Title',
+                value: `${race} ${realmTitle}`,
+                inline: true
+              }
+            ]
+          }
         });
 
       }
       else {
         // have not looked at this line yet, but suspect it needs to change
-        return message.channel.send(cannotFind + "\nCharacter not found.. we're they in Swoop?");
+        return  bot.sendMessage({
+          to: channelID,
+          message: 'Player not found'
+        });
       }
     });
 
